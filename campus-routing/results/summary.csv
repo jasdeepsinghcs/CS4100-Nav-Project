@@ -1,0 +1,7 @@
+scenario,planner,replans,total_expanded,total_millis,steps_walked,travel_minutes,arrived
+control_no_change,naive_astar,1,49,0.169,11,21.62,True
+block_near_start,naive_astar,2,98,0.331,13,24.34,True
+block_near_goal,naive_astar,2,89,0.253,14,32.53,True
+block_mid_route,naive_astar,2,18,0.057,8,12.37,True
+multiple_changes,naive_astar,4,196,0.528,18,27.15,True
+crowd_spike,naive_astar,2,29,0.092,7,11.86,True

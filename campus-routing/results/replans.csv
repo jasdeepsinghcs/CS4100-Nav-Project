@@ -1,0 +1,14 @@
+scenario,planner,replan,trigger,nodes_expanded,millis,remaining_seconds,remaining_nodes
+control_no_change,naive_astar,0,initial,49,0.169,1297.3,12
+block_near_start,naive_astar,0,initial,49,0.193,1297.3,12
+block_near_start,naive_astar,1,block ruggles_busway-isec_bridge,49,0.138,1411.1,13
+block_near_goal,naive_astar,0,initial,49,0.137,1297.3,12
+block_near_goal,naive_astar,1,block marino_center-cabot_center,40,0.117,1160.7,7
+block_mid_route,naive_astar,0,initial,16,0.052,742.4,9
+block_mid_route,naive_astar,1,block isec_bridge-isec,2,0.005,52.7,2
+multiple_changes,naive_astar,0,initial,49,0.135,1297.3,12
+multiple_changes,naive_astar,1,block ruggles_busway-isec_bridge,49,0.134,1411.1,13
+multiple_changes,naive_astar,2,crowd centennial_common-knowles_center,49,0.131,1347.7,16
+multiple_changes,naive_astar,3,block dockser_hall-stetson_east,49,0.129,1191.7,13
+crowd_spike,naive_astar,0,initial,12,0.041,619.2,7
+crowd_spike,naive_astar,1,crowd snell_library-curry_student_center,17,0.051,481.0,6
