@@ -229,12 +229,19 @@ class DStarLite:
         # search every time the user/agent moves to next node (A*)
         self.start = newstart
 
+    def step_to(self, node):
+        """
+        Agent walks one node forward. This is the name the experiment
+        harness calls, it just runs updatingkm.
+        """
+        self.updatingkm(node)
+
 
 
 # temp test case
 if __name__  == "__main__":
     print("successful run")
 
-    path, nodes = astar("snell", "curry")
+    path, nodes = astar("snell_library", "curry_student_center")
     print("path:", path)
     print("nodes:", nodes)
