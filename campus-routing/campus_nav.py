@@ -48,12 +48,20 @@ LATLON = {
     "behrakis_center": (42.33665155610561, -71.0916480918257),
     "west_village_f": (42.33758975278314, -71.09118910523377),
     "west_village_h": (42.33849082138689, -71.09241886340898),
+    "west_village_e": (42.33681470801023, -71.0921395744426),
+    "west_village_c": (42.3371581587729, -71.09227050030374),
+    "west_village_a_north": (42.33786511853449, -71.09273033747439),
+    "west_village_a_south": (42.33723410522528, -71.09313510376279),
     "northeastern_tstop": (42.34002030748497, -71.08996131391557),
 
     # dorms and rec, north east corner
     "speare_hall": (42.340617402865625, -71.08979694016212),
-    "stetson_west": (42.340617402865625, -71.08979694016212),
+    "stetson_west": (42.340890591415615, -71.09077779109043),
     "stetson_east": (42.34147578690803, -71.09001594732432),
+    "melven_hall": (42.34284667155145, -71.0904319387948),
+    "smith_hall": (42.34248846867329, -71.09053312404198),
+    "kerr_hall": (42.341844472639615, -71.09117392695374),
+    "kennedy_hall": (42.34284456776697, -71.09040062941312),
     "marino_center": (42.3401360210806, -71.09039632817314),
     "cabot_center": (42.3392797914226, -71.08939180384694),
     "matthews_arena": (42.3409700579917, -71.08465750590888),
@@ -86,7 +94,7 @@ LATLON = {
     # the ruggles upper busway
     "ruggles_busway": (42.33731354881061, -71.08891247273189),
     # main campus end of the bridge over the tracks, not ISEC itself
-    "isec_bridge": (42.337591101995606, -71.08779049576968),
+    "isec_bridge": (42.338042214854866, -71.0883442642753),
 }
 
 # anchor for the lat/lon -> meters conversion, roughly the middle of campus
@@ -108,28 +116,28 @@ WALK_SPEED = 1.4  # m/s, used to turn meters into seconds
 # straight line and the heuristic stops being admissible.
 KIND_SLOWDOWN = {
     "walk": 1.0,
-    "busy": 1.25,    # hallways and doors that jam up between classes
-    "ramp": 1.15,    # step free but takes the long way round
-    "stairs": 1.35,  # slower, and unusable if AVOID_STAIRS is on
+    "stairs": 1.35,  # slower to climb than flat ground
 }
+
+# every stairs spot on campus has a ramp or elevator near it, so step free
+# routing doesn't ban stairs edges, it just pays extra to go around. also
+# has to be >= 1.0 for the same heuristic reason as above.
+STEP_FREE_PENALTY = 1.4
 
 # every walkway on campus as (a, b, kind). written once, both directions
 # get built below.
 EDGE_SPECS = [
     # north quad
     ("lake_hall", "nightingale_hall", "walk"),
-    ("lake_hall", "hurtig_hall", "walk"),
     ("nightingale_hall", "holmes_hall", "walk"),
     ("nightingale_hall", "meserve_hall", "walk"),
-    ("meserve_hall", "hurtig_hall", "walk"),
-    ("meserve_hall", "robinson_hall", "walk"),
     ("hurtig_hall", "hayden_hall", "walk"),
     ("robinson_hall", "ell_hall", "walk"),
     ("robinson_hall", "richards_hall", "walk"),
     ("hayden_hall", "ell_hall", "walk"),
     ("hayden_hall", "krentzman_quad", "walk"),
-    ("ell_hall", "richards_hall", "busy"),
-    ("ell_hall", "curry_student_center", "busy"),
+    ("ell_hall", "richards_hall", "walk"),
+    ("ell_hall", "curry_student_center", "walk"),
     ("richards_hall", "curry_student_center", "walk"),
     ("richards_hall", "churchill_hall", "walk"),
     ("churchill_hall", "cargill_hall", "walk"),
@@ -139,7 +147,6 @@ EDGE_SPECS = [
     ("kariotis_hall", "holmes_hall", "walk"),
     ("dockser_hall", "knowles_center", "walk"),
     ("dockser_hall", "stetson_east", "walk"),
-    ("knowles_center", "squashbusters", "walk"),
     ("knowles_center", "centennial_common", "walk"),
     ("holmes_hall", "speare_hall", "walk"),
     ("speare_hall", "stetson_west", "walk"),
@@ -147,14 +154,13 @@ EDGE_SPECS = [
     ("stetson_west", "marino_center", "walk"),
     ("marino_center", "stetson_east", "walk"),
     ("marino_center", "cabot_center", "walk"),
-    ("cabot_center", "matthews_arena", "walk"),
     ("matthews_arena", "jct_mass_ave", "walk"),
     ("jct_mass_ave", "jct_columbus_ave", "walk"),
     ("jct_columbus_ave", "squashbusters", "walk"),
 
     # middle of campus
     ("curry_student_center", "centennial_common", "walk"),
-    ("curry_student_center", "snell_library", "busy"),
+    ("curry_student_center", "snell_library", "walk"),
     ("centennial_common", "snell_library", "walk"),
     ("centennial_common", "egan_center", "walk"),
     ("snell_library", "jct_snell_quad", "walk"),
@@ -173,16 +179,16 @@ EDGE_SPECS = [
 
     # west side
     ("northeastern_tstop", "jct_huntington", "walk"),
-    ("jct_huntington", "behrakis_center", "walk"),
     ("jct_huntington", "forsyth_building", "walk"),
     ("forsyth_building", "mugar_life_sciences", "walk"),
     ("forsyth_building", "ryder_hall", "walk"),
-    ("mugar_life_sciences", "behrakis_center", "walk"),
-    ("west_village_f", "west_village_h", "stairs"),
+    ("behrakis_center", "ryder_hall", "walk"),
+    ("behrakis_center", "west_village_f", "walk"),
+    ("west_village_f", "west_village_h", "walk"),
     ("west_village_f", "ryder_hall", "walk"),
-    ("west_village_h", "jct_leon_st_wv", "ramp"),
-    ("jct_leon_st_wv", "jct_ruggles_st", "ramp"),
-    ("jct_ruggles_st", "international_village", "ramp"),
+    ("west_village_h", "jct_leon_st_wv", "walk"),
+    ("jct_leon_st_wv", "jct_ruggles_st", "walk"),
+    ("jct_ruggles_st", "international_village", "walk"),
 
     # south and across the tracks
     ("international_village", "ruggles_busway", "walk"),
@@ -192,16 +198,32 @@ EDGE_SPECS = [
     ("ruggles_busway", "columbus_garage", "walk"),
     ("isec_bridge", "snell_engineering", "walk"),
     ("isec_bridge", "isec", "stairs"),
-    ("columbus_garage", "isec", "ramp"),
+    ("columbus_garage", "isec", "walk"),
+    ("squashbusters", "columbus_garage", "walk"),
     ("columbus_garage", "carter_playground", "walk"),
     ("columbus_garage", "renaissance_park", "walk"),
     ("isec", "exp_building", "walk"),
     ("exp_building", "carter_playground", "walk"),
     ("renaissance_park", "ruggles_station", "walk"),
+    # west village cluster
+    ("west_village_e", "west_village_c", "walk"),
+    ("west_village_e", "west_village_f", "walk"),
+    ("west_village_e", "behrakis_center", "walk"),
+    ("west_village_c", "west_village_a_south", "walk"),
+    ("west_village_a_south", "west_village_a_north", "walk"),
+    ("west_village_a_north", "west_village_h", "walk"),
+
+    # dorms up past stetson
+    ("melven_hall", "kennedy_hall", "walk"),
+    ("melven_hall", "smith_hall", "walk"),
+    ("smith_hall", "kerr_hall", "walk"),
+    ("kerr_hall", "stetson_east", "walk"),
+
 ]
 
-# flip this on for the accessible routes feature. edge_cost then refuses
-# to use any stairs edge, so A* routes around them on its own.
+# flip this on for the accessible routes feature. stairs edges then cost
+# extra (you take the ramp or elevator next to them) so routes lean toward
+# step free paths on their own.
 AVOID_STAIRS = False
 
 
@@ -248,9 +270,11 @@ def get_neighbors(node):
 
 def edge_cost(a, b):
     """Seconds to walk a -> b. inf if blocked or no edge exists."""
+    cost = EDGES[a].get(b, float("inf"))
     if AVOID_STAIRS and EDGE_KIND.get((a, b)) == "stairs":
-        return float("inf")
-    return EDGES[a].get(b, float("inf"))
+        # take the ramp around instead of the stairs
+        cost = cost * STEP_FREE_PENALTY
+    return cost
 
 
 def heuristic(a, b):

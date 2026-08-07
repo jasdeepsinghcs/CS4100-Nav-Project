@@ -8,83 +8,123 @@ construction or a path getting jammed between classes.
 ## Why we are doing this
 
 Google Maps can get you from building to building, but it treats campus like any
-other road network. It does not know about the shortcut through Snell, it does
-not know Forsyth is closed for construction this week, and it does not know that
-the bridge over the train tracks to ISEC is stairs only. Students end up figuring
-it out themselves or asking someone.
+other road network. It does not know a walkway is closed for construction this
+week, it does not know which paths jam up between classes, and it has no idea
+which routes involve stairs. Students end up figuring it out themselves or
+asking someone.
 
-The other half of this is accessibility. If you cannot use stairs, the shortest
-route is often not a route you can actually take. Most tools treat that as a
-filter you turn on at the end. We treat it as part of the cost model, so the
-router just never hands you a path you cannot use.
+The other half of this is accessibility. If you cannot use stairs, the fastest
+route on paper is not always the route you would actually want. Most tools treat
+that as a filter you turn on at the end. We treat it as part of the cost model,
+so the router leans toward step free paths on its own.
 
-## The idea
+## How it works
 
-Model campus as a graph. Buildings and walkway corners are nodes, sidewalks
-between them are edges, and each edge costs however many seconds it takes to walk
-it. Finding a route is then a shortest path problem.
+Campus is modeled as a graph. Buildings and walkway corners are nodes (59 of
+them), sidewalks between them are edges (81), and each edge costs however many
+seconds it takes to walk it. Finding a route is then a shortest path problem.
 
-We use two algorithms:
+The pipeline goes:
 
-- **A\*** finds the best route from scratch. This is our baseline.
-- **D\* Lite** repairs an existing route when the map changes, instead of
-  starting over. This is the interesting one, because a student walking to class
-  who hits a closed path does not need the whole search redone, only the part
-  that actually changed.
-
-The experiment is measuring whether that repair is actually cheaper than just
-rerunning A\*, and by how much.
+1. `campus_nav.py` holds the graph. Node positions are real lat/lon pulled off
+   the map, converted into meters. Edge costs are worked out from straight line
+   distance and walking speed, we never type seconds in by hand.
+2. A* searches the graph for the fastest route. It uses straight line time as
+   its heuristic, which never overestimates, so the routes it returns are
+   actually the fastest ones.
+3. While the agent walks, the map can change. An edge can be blocked
+   (construction) or get more expensive (crowds). The planner is told what
+   changed and replans.
+4. The naive way to replan is rerunning A* from scratch every time. D* Lite is
+   the smarter way, it keeps its search state and only repairs the part that
+   changed. Our experiments measure how much work each one does for the same
+   situations.
 
 ## Files
 
-- `campus-routing/campus_nav.py` is the campus graph, the A\* search, and the
-  D\* Lite class
-- `campus-routing/check_graph.py` checks the graph for mistakes, run it after
-  editing coordinates or edges
-- `campus-routing/experiments.py` walks an agent along a route, breaks the map
-  partway through, and records what each planner had to do to recover
-- `campus-routing/results/` holds the csv logs and the plots
+everything lives in `campus-routing/`
 
-## Running it
+- `campus_nav.py` is the campus graph and the plain A* search, plus plotting
+- `algorithm.py` is Kriti's algorithm file, her A* and the D* Lite class
+  (D* Lite is in progress)
+- `check_graph.py` checks the graph for mistakes, run it after editing
+  coordinates or edges
+- `experiments.py` walks an agent along a route, breaks the map partway
+  through, and records nodes expanded and time per replan
+- `compare_plots.py` turns the experiment csv into the bar charts for the report
+- `trip.py` is routes with stops along the way, like grabbing coffee before
+  class, and works out what time to leave
+- `make_demo.py` records the demo video of the agent walking and rerouting
+- `results/` holds the csv logs, plots, and the demo video
+
+## Getting it running
+
+You need python3 with matplotlib (`pip3 install matplotlib`). For the demo
+video you also need ffmpeg (`brew install ffmpeg` on mac), without it you still
+get a gif.
 
 ```
 cd campus-routing
-python3 check_graph.py     # should print all checks passed
-python3 experiments.py     # writes results/replans.csv and results/summary.csv
+python3 check_graph.py       # sanity checks the graph, run this first
+python3 experiments.py       # runs all 6 scenarios, writes results/*.csv
+python3 compare_plots.py     # makes the comparison charts from the csv
+python3 trip.py              # multi stop trip demo with leave-by times
+python3 make_demo.py         # records results/demo.mp4
 ```
 
-`experiments.py` runs the A\* baseline on its own, so it works before D\* Lite is
-finished. Once `DStarLite` is implemented it gets detected automatically and both
-planners run side by side with no changes needed.
+`experiments.py` runs the naive A* baseline on its own, so everything works
+before D* Lite is finished. Once `DStarLite.plan()` exists in `algorithm.py` it
+gets picked up automatically and both planners run side by side, nothing else
+needs to change.
 
-## How the graph works
+## How the graph data works
 
-Nodes are stored as lat/lon in `LATLON` and converted to meters. Coordinates are
-approximate and should be checked against the real campus map before we put any
-figures in the report.
+Nodes are stored as lat/lon in `LATLON` in `campus_nav.py`. To add a building,
+right click it on google maps, copy the coordinates, add it to `LATLON` and add
+its walkways to `EDGE_SPECS`. Then run `check_graph.py`, it catches one way
+edges, unknown names, stranded buildings, that kind of thing.
 
-Edge costs are in seconds, not meters. We do not type them in by hand. Each edge
-says what kind of path it is, and the cost comes out of the straight line
-distance times a slowdown factor for that kind:
+Edge costs come from straight line distance times a slowdown factor per path
+kind:
 
 - `walk` is an open sidewalk, factor 1.0
-- `busy` is a hallway or door that jams up between classes, factor 1.25
-- `ramp` is step free but takes the long way round, factor 1.15
-- `stairs` is slower and unusable in accessible mode, factor 1.35
+- `stairs` has steps on it, factor 1.35 since climbing is slower
 
 Every factor has to stay at or above 1.0. If a path were ever faster than the
-straight line between its endpoints, the A\* heuristic would start overestimating
-and A\* would quietly return routes that are not actually the fastest. It would
-not crash, it would just be wrong, which is worse. `check_graph.py` tests for
-this.
+straight line between its endpoints, the A* heuristic would start
+overestimating and A* would quietly return routes that are not actually the
+fastest. It would not crash, it would just be wrong, which is worse.
+`check_graph.py` tests for this.
+
+One known limitation: real campus paths curve around buildings but our costs
+use the straight line, so walking times come out a little optimistic. Where a
+path bends enough to matter we added corner nodes (the `jct_` ones), like the
+West Village to International Village walk which goes down Leon St and along
+Ruggles St instead of straight across.
 
 ## Accessible routing
 
-Set `AVOID_STAIRS = True` and `edge_cost` starts returning infinity for stairs
-edges, so both algorithms route around them without needing any special case.
-`check_graph.py` confirms campus is still fully connected with stairs turned off,
-so nobody gets stranded.
+Every stairs spot on campus has a ramp or elevator next to it, so step free
+routing does not ban stairs edges. Instead, setting `AVOID_STAIRS = True` makes
+stairs edges cost extra (`STEP_FREE_PENALTY`), which is the time it takes to go
+around on the ramp. Routes then lean toward step free paths on their own, and
+if a ramp or elevator is closed for construction, `block_edge` handles it like
+any other closure and the route goes around it.
 
-Example: from the pedestrian crossing to ISEC, the normal route is the bridge
-stairs at 0.8 minutes. In accessible mode it goes around through Columbus garage
-instead, which takes 2.3 minutes.
+`check_graph.py` confirms step free mode keeps the whole campus reachable.
+
+## The experiments
+
+Six scenarios, each one walks the agent from Speare Hall across campus to West
+Village A (except the crowding one which goes to Ell Hall). Partway through we
+block an edge or spike its cost, the planner replans, and we log how many nodes
+it expanded and how long the replan took.
+
+- control with no changes, to have something to compare against
+- blocked path near the start, near the goal, and mid route
+- three changes in one trip
+- a crowd spike that makes a path slow but not blocked
+
+The point of the comparison: when the map changes, the naive planner redoes the
+whole search, D* Lite should only repair what changed. Nodes expanded is the
+number that shows the difference.
