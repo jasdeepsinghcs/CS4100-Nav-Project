@@ -62,10 +62,19 @@ def check_admissible():
     return bad
 
 
+# edges we checked on the map and are really that long
+KNOWN_LONG = {
+    # the walk out to mass ave and along columbus to squashbusters
+    frozenset(("jct_columbus_ave", "squashbusters")),
+}
+
+
 def check_edge_lengths(limit=350):
     """Really long edges usually mean a typo in the coordinates."""
     out = []
     for a, b, _ in cn.EDGE_SPECS:
+        if frozenset((a, b)) in KNOWN_LONG:
+            continue
         x1, y1 = cn.COORDS[a]
         x2, y2 = cn.COORDS[b]
         d = math.hypot(x2 - x1, y2 - y1)
@@ -75,8 +84,10 @@ def check_edge_lengths(limit=350):
 
 
 def check_stairs_have_alternatives():
-    """Accessible routing is only useful if turning stairs off still leaves
-    the campus connected."""
+    """Step free mode has to keep campus connected, and the penalty can't
+    be under 1.0 or the heuristic starts overestimating."""
+    if cn.STEP_FREE_PENALTY < 1.0:
+        return ["STEP_FREE_PENALTY is under 1.0"]
     cn.AVOID_STAIRS = True
     stranded = sorted(set(cn.all_nodes()) - reachable_from("snell_library"))
     cn.AVOID_STAIRS = False

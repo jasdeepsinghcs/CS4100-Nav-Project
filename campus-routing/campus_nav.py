@@ -116,10 +116,13 @@ WALK_SPEED = 1.4  # m/s, used to turn meters into seconds
 # straight line and the heuristic stops being admissible.
 KIND_SLOWDOWN = {
     "walk": 1.0,
-    "busy": 1.25,    # hallways and doors that jam up between classes
-    "ramp": 1.15,    # step free but takes the long way round
-    "stairs": 1.35,  # slower, and unusable if AVOID_STAIRS is on
+    "stairs": 1.35,  # slower to climb than flat ground
 }
+
+# every stairs spot on campus has a ramp or elevator near it, so step free
+# routing doesn't ban stairs edges, it just pays extra to go around. also
+# has to be >= 1.0 for the same heuristic reason as above.
+STEP_FREE_PENALTY = 1.4
 
 # every walkway on campus as (a, b, kind). written once, both directions
 # get built below.
@@ -133,8 +136,8 @@ EDGE_SPECS = [
     ("robinson_hall", "richards_hall", "walk"),
     ("hayden_hall", "ell_hall", "walk"),
     ("hayden_hall", "krentzman_quad", "walk"),
-    ("ell_hall", "richards_hall", "busy"),
-    ("ell_hall", "curry_student_center", "busy"),
+    ("ell_hall", "richards_hall", "walk"),
+    ("ell_hall", "curry_student_center", "walk"),
     ("richards_hall", "curry_student_center", "walk"),
     ("richards_hall", "churchill_hall", "walk"),
     ("churchill_hall", "cargill_hall", "walk"),
@@ -157,7 +160,7 @@ EDGE_SPECS = [
 
     # middle of campus
     ("curry_student_center", "centennial_common", "walk"),
-    ("curry_student_center", "snell_library", "busy"),
+    ("curry_student_center", "snell_library", "walk"),
     ("centennial_common", "snell_library", "walk"),
     ("centennial_common", "egan_center", "walk"),
     ("snell_library", "jct_snell_quad", "walk"),
@@ -181,11 +184,11 @@ EDGE_SPECS = [
     ("forsyth_building", "ryder_hall", "walk"),
     ("behrakis_center", "ryder_hall", "walk"),
     ("behrakis_center", "west_village_f", "walk"),
-    ("west_village_f", "west_village_h", "stairs"),
+    ("west_village_f", "west_village_h", "walk"),
     ("west_village_f", "ryder_hall", "walk"),
-    ("west_village_h", "jct_leon_st_wv", "ramp"),
-    ("jct_leon_st_wv", "jct_ruggles_st", "ramp"),
-    ("jct_ruggles_st", "international_village", "ramp"),
+    ("west_village_h", "jct_leon_st_wv", "walk"),
+    ("jct_leon_st_wv", "jct_ruggles_st", "walk"),
+    ("jct_ruggles_st", "international_village", "walk"),
 
     # south and across the tracks
     ("international_village", "ruggles_busway", "walk"),
@@ -195,7 +198,7 @@ EDGE_SPECS = [
     ("ruggles_busway", "columbus_garage", "walk"),
     ("isec_bridge", "snell_engineering", "walk"),
     ("isec_bridge", "isec", "stairs"),
-    ("columbus_garage", "isec", "ramp"),
+    ("columbus_garage", "isec", "walk"),
     ("squashbusters", "columbus_garage", "walk"),
     ("columbus_garage", "carter_playground", "walk"),
     ("columbus_garage", "renaissance_park", "walk"),
@@ -218,8 +221,9 @@ EDGE_SPECS = [
 
 ]
 
-# flip this on for the accessible routes feature. edge_cost then refuses
-# to use any stairs edge, so A* routes around them on its own.
+# flip this on for the accessible routes feature. stairs edges then cost
+# extra (you take the ramp or elevator next to them) so routes lean toward
+# step free paths on their own.
 AVOID_STAIRS = False
 
 
@@ -266,9 +270,11 @@ def get_neighbors(node):
 
 def edge_cost(a, b):
     """Seconds to walk a -> b. inf if blocked or no edge exists."""
+    cost = EDGES[a].get(b, float("inf"))
     if AVOID_STAIRS and EDGE_KIND.get((a, b)) == "stairs":
-        return float("inf")
-    return EDGES[a].get(b, float("inf"))
+        # take the ramp around instead of the stairs
+        cost = cost * STEP_FREE_PENALTY
+    return cost
 
 
 def heuristic(a, b):

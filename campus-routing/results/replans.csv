@@ -1,14 +1,14 @@
 scenario,planner,replan,trigger,nodes_expanded,millis,remaining_seconds,remaining_nodes
-control_no_change,naive_astar,0,initial,42,0.209,1074.6,15
+control_no_change,naive_astar,0,initial,42,0.18,1074.6,15
 block_near_start,naive_astar,0,initial,42,0.123,1074.6,15
-block_near_start,naive_astar,1,block holmes_hall-kariotis_hall,40,0.119,1353.4,16
-block_mid_route,naive_astar,0,initial,42,0.12,1074.6,15
-block_mid_route,naive_astar,1,block snell_engineering-shillman_hall,29,0.097,560.1,10
-block_near_goal,naive_astar,0,initial,42,0.121,1074.6,15
-block_near_goal,naive_astar,1,block west_village_e-west_village_c,6,0.018,272.5,4
-multiple_changes,naive_astar,0,initial,42,0.118,1074.6,15
-multiple_changes,naive_astar,1,block holmes_hall-kariotis_hall,40,0.114,1353.4,16
-multiple_changes,naive_astar,2,crowd centennial_common-egan_center,41,0.119,850.5,11
-multiple_changes,naive_astar,3,block ryder_hall-behrakis_center,8,0.026,364.4,5
-crowd_spike,naive_astar,0,initial,18,0.057,619.2,7
-crowd_spike,naive_astar,1,crowd snell_library-curry_student_center,20,0.06,481.0,6
+block_near_start,naive_astar,1,block holmes_hall-kariotis_hall,40,0.115,1353.4,16
+block_mid_route,naive_astar,0,initial,42,0.118,1074.6,15
+block_mid_route,naive_astar,1,block snell_engineering-shillman_hall,32,0.105,560.1,10
+block_near_goal,naive_astar,0,initial,42,0.118,1074.6,15
+block_near_goal,naive_astar,1,block west_village_e-west_village_c,5,0.015,237.0,4
+multiple_changes,naive_astar,0,initial,42,0.116,1074.6,15
+multiple_changes,naive_astar,1,block holmes_hall-kariotis_hall,40,0.111,1353.4,16
+multiple_changes,naive_astar,2,crowd centennial_common-egan_center,41,0.113,850.5,11
+multiple_changes,naive_astar,3,block ryder_hall-behrakis_center,5,0.018,328.9,5
+crowd_spike,naive_astar,0,initial,16,0.051,551.9,7
+crowd_spike,naive_astar,1,crowd snell_library-curry_student_center,22,0.065,481.0,6

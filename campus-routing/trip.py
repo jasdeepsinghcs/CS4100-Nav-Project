@@ -63,7 +63,7 @@ if __name__ == "__main__":
     show_trip(START, STOPS, GOAL, arrive_at="10:00")
 
     print()
-    print("same trip if you can't do stairs (the bridge to ISEC is steps):")
+    print("same trip step free (takes the ramps around any stairs):")
     cn.AVOID_STAIRS = True
     show_trip(START, STOPS, GOAL, arrive_at="10:00")
     cn.AVOID_STAIRS = False

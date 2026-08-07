@@ -2,8 +2,7 @@
 what each planner had to do to recover.
 
 Naive baseline reruns the whole A* search from wherever the agent is standing.
-D* Lite is supposed to repair instead. If Kriti's DStarLite isn't finished yet
-this still runs, it just skips the D* Lite rows.
+D* Lite is supposed to repair instead.
 """
 
 import csv
@@ -11,6 +10,13 @@ import os
 import time
 
 import campus_nav as cn
+
+# kriti's D* Lite lives in algorithm.py, fall back to the stub in
+# campus_nav if that file isn't there
+try:
+    from algorithm import DStarLite
+except ImportError:
+    from campus_nav import DStarLite
 
 
 # ============ event injection ============
@@ -105,7 +111,7 @@ class DStarPlanner:
     name = "dstar_lite"
 
     def __init__(self, start, goal):
-        self.inner = cn.DStarLite(start, goal)
+        self.inner = DStarLite(start, goal)
 
     def plan(self):
         return self.inner.plan()
@@ -121,7 +127,7 @@ def dstar_ready():
     """True once DStarLite actually returns a path instead of the stub None."""
     cn.reset_edges()
     try:
-        result = cn.DStarLite("snell_library", "curry_student_center").plan()
+        result = DStarLite("snell_library", "curry_student_center").plan()
         path, _ = result
         return bool(path)
     except Exception:
