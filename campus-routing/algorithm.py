@@ -1,4 +1,4 @@
-# algorithim for A* 
+# algorithim
 # import that allows priority queue and calculations
 import heapq
 import math
@@ -229,6 +229,7 @@ class DStarLite:
         # search every time the user/agent moves to next node (A*)
         self.start = newstart
 
+<<<<<<< HEAD
     def step_to(self, node):
         """
         Agent walks one node forward. This is the name the experiment
@@ -236,6 +237,188 @@ class DStarLite:
         """
         self.updatingkm(node)
 
+=======
+    # helper for recalculation and updates node
+    def updaterhs(self, node):
+        """
+        Updates rhs for node and adds it to the PQ if it is
+        not consistent with g
+        Additionally, makes sure the node info is accurate and if 
+        it is not then makes sure it is in PQ so D* can fix it.
+        """
+
+        # rhs 0 at goal
+        if node != self.goal:
+
+            # assume no known path
+            lowestrhs = float("inf")
+
+            # check neighboring nodes
+            for neighbor in get_neighbors(node):
+
+                # cost from current node to neighbor
+                movecost = edge_cost(node, neighbor)
+
+                # possible cost if travel through neighbor
+                possiblerhs = movecost + self.g[neighbor]
+
+                # keep lowest possible rhs
+                if possiblerhs < lowestrhs:
+                    lowestrhs = possiblerhs
+
+            # save the best one-step lookahead value
+            self.rhs[node] = lowestrhs
+
+        # if g and rhs are not the same, update node
+        if not self.is_consistent(node):
+
+            # calculate 2-part key for node
+            nodekey = self.calculate_key(node)
+
+            # put node in PQ
+            heapq.heappush(
+                self.priority_queue,
+                (nodekey[0], nodekey[1], node)
+            )
+
+    def computeshortestpath(self):
+        """
+        Main loop for D* which repairs the most shortest path
+        """
+
+        # counts the amount of nodes in D* explores
+        nodes_expanded = 0
+
+        # continues search as nodes go to PQ
+        while self.priority_queue:
+
+            # get smallest key in PQ
+            # 0 is ?? and 1 is ??
+            # top key: ??
+            topkey = (
+                self.priority_queue[0][0],
+                self.priority_queue[0][1]
+            )
+
+            # calculate current key (for start)
+            # start key: ??
+            startkey = self.calculate_key(self.start)
+
+            # if smallest key is not better then start key, then stop
+            # if start node is consistent, stop
+            if topkey >= startkey and self.is_consistent(self.start):
+                break
+
+            # remove node with smallest key from PQ
+            # heappop: ??
+            oldfirstkey, oldsecondkey, current = heapq.heappop(
+                self.priority_queue
+            )
+
+            # store old key (tuple)
+            oldkey = (oldfirstkey, oldsecondkey)
+
+            # calculate node's current key
+            newkey = self.calculate_key(current)
+
+            # if old queue key is outdated add it back with the new key
+            if oldkey < newkey:
+                heapq.heappush(
+                    self.priority_queue,
+                    (newkey[0], newkey[1], current)
+                )
+                continue
+
+            # node is being explored
+            nodes_expanded += 1
+
+            # rhs is better than g, update g
+            # g should then match rhs
+            if self.g[current] > self.rhs[current]:
+
+                # ??
+                self.g[current] = self.rhs[current]
+
+                # update neighbor nodes (rhs values could be dependent on current)
+                for neighbor in get_neighbors(current):
+                    self.updaterhs(neighbor)
+
+            else:
+
+                # old g value isn't reliable to depend on
+                self.g[current] = float ("inf")
+
+                # update current
+                self.updaterhs(current)
+
+                # update neighbor nodes
+                for neighbor in get_neighbors(current):
+                    self.updaterhs(neighbor)
+
+        # return nodes explored (during this round)
+        return nodes_expanded
+
+
+    def step_to(self, node):
+        """
+        Moves agent/user one node forward and updates both the start and km
+        Keeps the steps updated and accurate
+        """
+
+        # checks to make sure node is connected to current start
+        # current start: ??
+        if node not in get_neighbors(self.start):
+            raise ValueError("only can move forward to a node that is neighboring")
+
+        # update km and current start node to new node
+        self.updatingkm(node)
+
+    def notify_edge_change(self, a, b, oldcost):
+        """
+        Keeps track of nodes on a change edge that need to be updated
+        """
+
+        # updates very first node because the edge may affect rhs (change edge)
+        # changed rhs: ??
+        # a: ??
+        self.updaterhs(a)
+
+        # update the second node for same reason
+        # b: ??
+        self.updaterhs(b)
+
+    def planroute(self):
+        """
+        Computes D* route and returns path and nodes expanded.
+        """
+
+        # repair shortest path info
+        nodes_expanded = self.computeshortestpath()
+
+        # if no path exists, return empty
+        if math.isinf(self.g[self.start]):
+            return [], nodes_expanded
+
+        # begin route at current start
+        path = [self.start]
+        current = self.start
+
+        # goes on until goal met
+        while current != self.goal:
+
+            # locate the neighbor with cheapest cost to goal
+            current = min(
+                get_neighbors(current),
+                # lambda: ??
+                key=lambda neighbor: edge_cost(current, neighbor) + self.g[neighbor]
+            )
+
+            # add chosen node to path
+            path.append(current)
+
+        # return route and nodes explored
+        return path, nodes_expanded
+>>>>>>> 786a7c5 (commit 2)
 
 
 # temp test case
@@ -245,3 +428,17 @@ if __name__  == "__main__":
     path, nodes = astar("snell_library", "curry_student_center")
     print("path:", path)
     print("nodes:", nodes)
+
+# temp test case with D* day 8
+if __name__ == "__main__":
+    dstar = DStarLite("snell_library", "curry_student_center")
+    dstar_path, dstar_nodes = dstar.planroute()
+
+    print("D* path:", dstar_path)
+    print("D* nodes:", dstar_nodes)
+
+   # test A and D match day 8
+if path == dstar_path:
+    print("PASS: A* and D* Lite paths match")
+else:
+    print("FAIL: do not match")
