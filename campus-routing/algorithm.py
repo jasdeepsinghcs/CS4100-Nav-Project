@@ -320,6 +320,11 @@ class DStarLite:
                 )
                 continue
 
+            # node can be in the PQ more than once, if it already got fixed
+            # by an earlier pop this entry is old news, skip it
+            if self.is_consistent(current):
+                continue
+
             # node is being explored
             nodes_expanded += 1
 
@@ -410,6 +415,12 @@ class DStarLite:
         # return route and nodes explored
         return path, nodes_expanded
 
+    def plan(self):
+        """
+        The name the experiment harness calls, just runs planroute.
+        """
+        return self.planroute()
+
 
 # temp test case
 if __name__  == "__main__":
@@ -427,8 +438,10 @@ if __name__ == "__main__":
     print("D* path:", dstar_path)
     print("D* nodes:", dstar_nodes)
 
-   # test A and D match day 8
-if path == dstar_path:
-    print("PASS: A* and D* Lite paths match")
-else:
-    print("FAIL: do not match")
+    # test A and D match day 8
+    # (this has to stay inside the if __name__ block, otherwise importing
+    # this file crashes because path doesn't exist yet)
+    if path == dstar_path:
+        print("PASS: A* and D* Lite paths match")
+    else:
+        print("FAIL: do not match")
