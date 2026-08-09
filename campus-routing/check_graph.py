@@ -66,6 +66,8 @@ def check_admissible():
 KNOWN_LONG = {
     # the walk out to mass ave and along columbus to squashbusters
     frozenset(("jct_columbus_ave", "squashbusters")),
+    # the sheraton really is that far up mass ave
+    frozenset(("sheraton", "jct_mass_ave")),
 }
 
 
