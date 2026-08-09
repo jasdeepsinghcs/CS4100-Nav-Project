@@ -229,15 +229,6 @@ class DStarLite:
         # search every time the user/agent moves to next node (A*)
         self.start = newstart
 
-<<<<<<< HEAD
-    def step_to(self, node):
-        """
-        Agent walks one node forward. This is the name the experiment
-        harness calls, it just runs updatingkm.
-        """
-        self.updatingkm(node)
-
-=======
     # helper for recalculation and updates node
     def updaterhs(self, node):
         """
@@ -418,7 +409,6 @@ class DStarLite:
 
         # return route and nodes explored
         return path, nodes_expanded
->>>>>>> 786a7c5 (commit 2)
 
 
 # temp test case
