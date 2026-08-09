@@ -54,7 +54,7 @@ everything lives in `campus-routing/`
 - `compare_plots.py` turns the experiment csv into the bar charts for the report
 - `trip.py` is routes with stops along the way, like grabbing coffee before
   class, and works out what time to leave
-- `make_demo.py` records the demo video of the agent walking and rerouting
+- `make_demo.py` records the three demo videos, a closure, a crowd, and a trip with stops
 - `results/` holds the csv logs, plots, and the demo video
 
 ## Getting it running
@@ -69,7 +69,7 @@ python3 check_graph.py       # sanity checks the graph, run this first
 python3 experiments.py       # runs all 6 scenarios, writes results/*.csv
 python3 compare_plots.py     # makes the comparison charts from the csv
 python3 trip.py              # multi stop trip demo with leave-by times
-python3 make_demo.py         # records results/demo.mp4
+python3 make_demo.py         # records the three demo videos
 ```
 
 `experiments.py` runs the naive A* baseline on its own, so everything works
