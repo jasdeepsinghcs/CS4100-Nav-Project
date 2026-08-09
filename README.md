@@ -20,8 +20,8 @@ so the router leans toward step free paths on its own.
 
 ## How it works
 
-Campus is modeled as a graph. Buildings and walkway corners are nodes (59 of
-them), sidewalks between them are edges (81), and each edge costs however many
+Campus is modeled as a graph. Buildings and walkway corners are nodes (60 of
+them), sidewalks between them are edges (82), and each edge costs however many
 seconds it takes to walk it. Finding a route is then a shortest path problem.
 
 The pipeline goes:

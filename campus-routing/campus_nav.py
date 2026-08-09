@@ -58,10 +58,10 @@ LATLON = {
     "speare_hall": (42.340617402865625, -71.08979694016212),
     "stetson_west": (42.340890591415615, -71.09077779109043),
     "stetson_east": (42.34147578690803, -71.09001594732432),
-    "melven_hall": (42.34284667155145, -71.0904319387948),
-    "smith_hall": (42.34248846867329, -71.09053312404198),
+    "melvin_hall": (42.34209743145291, -71.09112880788709),
+    "smith_hall": (42.34235392397317, -71.09058919616557),
     "kerr_hall": (42.341844472639615, -71.09117392695374),
-    "kennedy_hall": (42.34284456776697, -71.09040062941312),
+    "kennedy_hall": (42.34286690587469, -71.09040180688608),
     "marino_center": (42.3401360210806, -71.09039632817314),
     "cabot_center": (42.3392797914226, -71.08939180384694),
     "matthews_arena": (42.3409700579917, -71.08465750590888),
@@ -75,6 +75,7 @@ LATLON = {
     "carter_playground": (42.33886021552859, -71.08502892728653),
     "renaissance_park": (42.33550992677049, -71.08827528382076),
     "ruggles_station": (42.33670399478578, -71.08909079369701),
+    "sheraton": (42.346166626688166, -71.08360805969579),
 
     # walkway corners, not buildings. these are here so routes bend like real
     # sidewalks instead of cutting through the middle of buildings.
@@ -214,10 +215,11 @@ EDGE_SPECS = [
     ("west_village_a_north", "west_village_h", "walk"),
 
     # dorms up past stetson
-    ("melven_hall", "kennedy_hall", "walk"),
-    ("melven_hall", "smith_hall", "walk"),
+    ("melvin_hall", "kennedy_hall", "walk"),
+    ("melvin_hall", "smith_hall", "walk"),
     ("smith_hall", "kerr_hall", "walk"),
     ("kerr_hall", "stetson_east", "walk"),
+    ("sheraton", "jct_mass_ave", "walk"),
 
 ]
 
