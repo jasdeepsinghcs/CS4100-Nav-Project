@@ -187,12 +187,20 @@ def stops_frames():
         walked.append(nxt)
         path = path[1:]
         if nxt in labels:
-            pause = f"at {nxt.replace('_', ' ')}, {labels[nxt]} ({trip.MINUTES_PER_STOP} min)"
-            elapsed += trip.MINUTES_PER_STOP * 60
+            # sit at the stop and let the clock tick through it instead of
+            # jumping 5 minutes at once. the eta holds steady because we
+            # already budgeted this time in, which is the whole point
+            stop_secs = trip.MINUTES_PER_STOP * 60
             left.remove(nxt)
-            for _ in range(HOLD):
+            for i in range(HOLD):
+                spent = stop_secs * (i + 1) / HOLD
+                mins_left = (stop_secs - spent) / 60
+                pause = (f"at {nxt.replace('_', ' ')}, {labels[nxt]} "
+                         f"({mins_left:.0f} min left)")
                 frames.append(frame(walked, path, pause, stops=stops,
-                                    clock=stats(elapsed, path, stoptime())))
+                                    clock=stats(elapsed + spent, path,
+                                                stoptime() + stop_secs - spent)))
+            elapsed += stop_secs
     frames.append(frame(walked, [points[-1]],
                         f"made it to class at {attime(elapsed)}", stops=stops,
                         clock=stats(elapsed, [points[-1]])))
