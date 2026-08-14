@@ -228,7 +228,7 @@ class DStarLite:
         # search every time the user/agent moves to next node (A*)
         self.start = newstart
 
-    # helper for recalculation and updates node
+    # helper for the recalculation and updates node
     def updaterhs(self, node):
         """
         Updates rhs for node and adds it to the PQ if it is
@@ -419,7 +419,7 @@ if __name__  == "__main__":
     print("path:", path)
     print("nodes:", nodes)
 
-# temp test case with D*
+# temp test case with D* Lite
 if __name__ == "__main__":
     dstar = DStarLite("snell_library", "curry_student_center")
     dstar_path, dstar_nodes = dstar.planroute()
