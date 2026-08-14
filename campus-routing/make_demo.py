@@ -42,7 +42,7 @@ def stats(elapsed, path, extra_seconds=0):
     return (f"now {attime(elapsed)}   eta {eta}\n"
             f"{path_meters(path):.0f} m to go")
 
-# only label the places people recognize, labeling all 59 is unreadable
+# only label the places people recognize, labeling them all is unreadable
 LANDMARKS = ["speare_hall", "snell_library", "curry_student_center",
              "ruggles_station", "isec", "west_village_a_north",
              "matthews_arena", "international_village", "ell_hall"]
@@ -188,8 +188,8 @@ def stops_frames():
         path = path[1:]
         if nxt in labels:
             # sit at the stop and let the clock tick through it instead of
-            # jumping 5 minutes at once. the eta holds steady because we
-            # already budgeted this time in, which is the whole point
+            # jumping 5 minutes at once. the eta holds steady because the
+            # stop time was already budgeted in
             stop_secs = trip.MINUTES_PER_STOP * 60
             left.remove(nxt)
             for i in range(HOLD):

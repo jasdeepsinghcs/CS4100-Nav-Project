@@ -1,5 +1,5 @@
 """Sanity checks on the campus graph. Run this after editing COORDS or
-EDGE_SPECS, before trusting any experiment results."""
+EDGE_SPECS."""
 
 import math
 
@@ -17,7 +17,7 @@ def check_symmetric():
 
 
 def check_no_duplicates():
-    """Same pair listed twice in EDGE_SPECS, probably a copy paste slip."""
+    """Same pair listed twice in EDGE_SPECS."""
     seen = set()
     dupes = []
     for a, b, _ in cn.EDGE_SPECS:
