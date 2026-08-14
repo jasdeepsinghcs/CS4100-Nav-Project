@@ -1,5 +1,5 @@
 # Makes the comparison plots for the report. Run experiments.py first.
-# Plots whichever planners are in the csv, so it works before D* Lite is done.
+# Plots whichever planners are in the csv.
 
 import csv
 

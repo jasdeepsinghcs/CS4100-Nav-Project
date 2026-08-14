@@ -332,7 +332,7 @@ def path_cost(path):
 
 def plot_graph(path=None, blocked=None, title="Northeastern campus", save_to=None):
     """Matplotlib. Nodes at their COORDS, lines for edges, path highlighted,
-    blocked edges in red. Just needs to be readable for the report."""
+    blocked edges in red."""
     import matplotlib.pyplot as plt
 
     if blocked is None:
