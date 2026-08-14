@@ -429,6 +429,6 @@ if __name__ == "__main__":
 
     # test A and D match
     if path == dstar_path:
-        print("PASS: A* and D* Lite paths match")
+        print("passes: A* and D* Lite paths match")
     else:
-        print("FAIL: do not match")
+        print("fails: do not match")
