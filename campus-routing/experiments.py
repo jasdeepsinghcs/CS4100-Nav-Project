@@ -2,7 +2,7 @@
 what each planner had to do to recover.
 
 Naive baseline reruns the whole A* search from wherever the agent is standing.
-D* Lite is supposed to repair instead.
+D* Lite repairs instead.
 """
 
 import csv

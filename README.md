@@ -116,8 +116,7 @@ it, it's a one liner:
 python3 -c "import campus_nav; campus_nav.plot_graph(save_to='results/campus_graph.png')"
 ```
 
-`plot_graph` also takes a `path` to draw a route on top and a `title`, which is
-useful for slides.
+`plot_graph` also takes a `path` to draw a route on top and a `title`.
 
 ## How the graph data works
 
@@ -188,8 +187,8 @@ the bigger the gap, since the naive planner pays for a full search every time
 and D* Lite doesn't. `multiple_changes` has three events in one trip and is
 where they separate most, 127 against 64.
 
-The control is a fair test of nothing, so it comes out even, D* Lite is two
-nodes worse because the first search has to run either way. `crowd_spike` is
+The control has nothing to repair, so it comes out even, D* Lite is two nodes
+worse because the first search has to run either way. `crowd_spike` is
 close for the same reason, a slower edge that doesn't block anything barely
 changes the route. `block_near_goal` ties because the agent is nearly there and
 neither planner has much left to search.
@@ -197,11 +196,10 @@ neither planner has much left to search.
 Both planners produce the same `travel_minutes` in every scenario, so D* Lite
 is not saving work by returning worse routes.
 
-Two things worth being honest about:
+The milliseconds in `summary.csv` do not favor D* Lite, it is slower in wall
+clock in all six. On a 60 node graph a full A* is already under a millisecond,
+so what gets measured is mostly python overhead per node, and D* Lite does more
+work per node. Nodes expanded is the number that reflects the algorithms.
 
-- the milliseconds in `summary.csv` do not favor D* Lite, it is slower in wall
-  clock in all six. On a 60 node graph a full A* is already under a millisecond,
-  so what gets measured is mostly python overhead per node, and D* Lite does
-  more work per node. Nodes expanded is the number that reflects the algorithms.
-- a 60 node graph is small enough that the savings stay small in absolute terms.
-  The gap should widen on a bigger graph, but we have not tested that.
+A 60 node graph is also small enough that the savings stay small in absolute
+terms. The gap should widen on a bigger graph, but we have not tested that.
