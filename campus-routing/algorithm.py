@@ -19,7 +19,6 @@ def astar(start, goal):
     """
     # PQ is responsible for choosing with nodes to move on to and expand.
     # estimated goal cost, actual cost, node is included.
-    # f(n) = g(n) + h(n) (f(n): ?? g(n): ?? h(n): ??)
     priority_queue = []
 
     # actual cost at the start is 0
@@ -284,15 +283,12 @@ class DStarLite:
         while self.priority_queue:
 
             # get smallest key in PQ
-            # 0 is ?? and 1 is ??
-            # top key: ??
             topkey = (
                 self.priority_queue[0][0],
                 self.priority_queue[0][1]
             )
 
             # calculate current key (for start)
-            # start key: ??
             startkey = self.calculate_key(self.start)
 
             # if smallest key is not better then start key, then stop
@@ -301,7 +297,6 @@ class DStarLite:
                 break
 
             # remove node with smallest key from PQ
-            # heappop: ??
             oldfirstkey, oldsecondkey, current = heapq.heappop(
                 self.priority_queue
             )
@@ -332,7 +327,6 @@ class DStarLite:
             # g should then match rhs
             if self.g[current] > self.rhs[current]:
 
-                # ??
                 self.g[current] = self.rhs[current]
 
                 # update neighbor nodes (rhs values could be dependent on current)
@@ -362,7 +356,6 @@ class DStarLite:
         """
 
         # checks to make sure node is connected to current start
-        # current start: ??
         if node not in get_neighbors(self.start):
             raise ValueError("only can move forward to a node that is neighboring")
 
@@ -375,12 +368,9 @@ class DStarLite:
         """
 
         # updates very first node because the edge may affect rhs (change edge)
-        # changed rhs: ??
-        # a: ??
         self.updaterhs(a)
 
         # update the second node for same reason
-        # b: ??
         self.updaterhs(b)
 
     def planroute(self):
@@ -405,7 +395,6 @@ class DStarLite:
             # locate the neighbor with cheapest cost to goal
             current = min(
                 get_neighbors(current),
-                # lambda: ??
                 key=lambda neighbor: edge_cost(current, neighbor) + self.g[neighbor]
             )
 
@@ -421,7 +410,7 @@ class DStarLite:
         """
         return self.planroute()
 
-
+# all tests
 # temp test case
 if __name__  == "__main__":
     print("successful run")
@@ -430,7 +419,7 @@ if __name__  == "__main__":
     print("path:", path)
     print("nodes:", nodes)
 
-# temp test case with D* day 8
+# temp test case with D*
 if __name__ == "__main__":
     dstar = DStarLite("snell_library", "curry_student_center")
     dstar_path, dstar_nodes = dstar.planroute()
@@ -438,9 +427,7 @@ if __name__ == "__main__":
     print("D* path:", dstar_path)
     print("D* nodes:", dstar_nodes)
 
-    # test A and D match day 8
-    # (this has to stay inside the if __name__ block, otherwise importing
-    # this file crashes because path doesn't exist yet)
+    # test A and D match
     if path == dstar_path:
         print("PASS: A* and D* Lite paths match")
     else:
