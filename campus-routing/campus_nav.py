@@ -2,8 +2,7 @@
 
 
 # node ids are strings, coords are meters, edge costs are SECONDS.
-# heuristic has to be seconds too or it stops being admissible and both
-# algorithms give wrong answers without erroring.
+# heuristic has to be seconds too or it stops being admissible.
 
 import copy
 import heapq
@@ -247,7 +246,7 @@ def _build_edges():
 
 
 # node -> {neighbor: seconds}
-# list every edge BOTH ways or the graph goes one directional
+# only list an edge once in EDGE_SPECS, _build_edges adds the other direction
 EDGES = _build_edges()
 
 # node pair -> kind, so we can tell stairs from sidewalk later
@@ -333,7 +332,7 @@ def path_cost(path):
 
 def plot_graph(path=None, blocked=None, title="Northeastern campus", save_to=None):
     """Matplotlib. Nodes at their COORDS, lines for edges, path highlighted,
-    blocked edges in red. Just needs to be readable for the report."""
+    blocked edges in red."""
     import matplotlib.pyplot as plt
 
     if blocked is None:
@@ -386,7 +385,7 @@ def plot_graph(path=None, blocked=None, title="Northeastern campus", save_to=Non
 # ============ ALGORITHMS (B) ============
 
 def astar(start, goal):
-    """Plain A*, should be the baseline.
+    """Plain A*, the baseline planner.
     Returns (path, nodes_expanded). path is a list of node ids including
     start and goal, or [] if no route. nodes_expanded is how many nodes we
     popped off the queue - that's the number we plot."""
@@ -422,52 +421,3 @@ def astar(start, goal):
                 heapq.heappush(open_list, (new_g + heuristic(nb, goal), new_g, nb))
 
     return [], expanded
-
-
-class DStarLite:
-    """Replans cheaply when the map changes while you're already walking.
-
-    Each node has two values instead of one: g (best known cost to goal) and
-    rhs (one step lookahead). If they match the node is consistent. When an
-    edge changes we mark the affected nodes inconsistent and repair outward
-    from there, instead of redoing the whole search like A* would.
-
-    Searches backward from the goal, because as you walk your start keeps
-    moving but the goal doesn't, so anchoring at the goal means walking
-    doesn't invalidate the search.
-
-    Usage:
-        p = DStarLite("snell", "curry")
-        path, n = p.plan()             # full search, n is big
-        p.step_to(path[1])             # walk a step
-        old = block_edge("centennial", "curry")
-        p.notify_edge_change("centennial", "curry", old)
-        path, n = p.plan()             # repair, n should be tiny
-    """
-
-    def __init__(self, start, goal):
-        """g and rhs dicts (all inf except rhs[goal] = 0), priority queue with
-        goal pushed on, km = 0.
-
-        km is an offset on the queue keys so that when start moves we shift
-        everything by a constant instead of recomputing every entry.
-        """
-        pass
-
-    def plan(self):
-        """Compute or repair the path. Returns (path, nodes_expanded).
-
-        nodes_expanded is PER CALL not cumulative - the whole result is
-        "first call 200, repair 12". Cumulative shows nothing.
-        """
-        pass
-
-    def step_to(self, node):
-        """Walk one node forward. Updates start and bumps km. No searching."""
-        pass
-
-    def notify_edge_change(self, a, b, old_cost):
-        """Call after block_edge. Recompute rhs for the two nodes on the
-        changed edge and requeue them if inconsistent. Repair happens on the
-        next plan()."""
-        pass

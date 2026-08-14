@@ -35,10 +35,9 @@ The pipeline goes:
 3. While the agent walks, the map can change. An edge can be blocked
    (construction) or get more expensive (crowds). The planner is told what
    changed and replans.
-4. The naive way to replan is rerunning A* from scratch every time. D* Lite is
-   the smarter way, it keeps its search state and only repairs the part that
-   changed. Our experiments measure how much work each one does for the same
-   situations.
+4. The naive way to replan is rerunning A* from scratch every time. D* Lite
+   instead keeps its search state and only repairs the part that changed. Our
+   experiments measure how much work each one does for the same situations.
 
 ## Files
 
@@ -46,7 +45,6 @@ everything lives in `campus-routing/`
 
 - `campus_nav.py` is the campus graph and the plain A* search, plus plotting
 - `algorithm.py` is Kriti's algorithm file, her A* and the D* Lite class
-  (D* Lite is in progress)
 - `check_graph.py` checks the graph for mistakes, run it after editing
   coordinates or edges
 - `experiments.py` walks an agent along a route, breaks the map partway
@@ -55,7 +53,7 @@ everything lives in `campus-routing/`
 - `trip.py` is routes with stops along the way, like grabbing coffee before
   class, and works out what time to leave
 - `make_demo.py` records the three demo videos, a closure, a crowd, and a trip with stops
-- `results/` holds the csv logs, plots, and the demo video
+- `results/` holds the csv logs, plots, and the demo videos
 
 ## Getting it running
 
@@ -72,10 +70,53 @@ python3 trip.py              # multi stop trip demo with leave-by times
 python3 make_demo.py         # records the three demo videos
 ```
 
-`experiments.py` runs the naive A* baseline on its own, so everything works
-before D* Lite is finished. Once `DStarLite.plan()` exists in `algorithm.py` it
-gets picked up automatically and both planners run side by side, nothing else
-needs to change.
+`experiments.py` runs both planners side by side, the naive A* baseline and
+D* Lite from `algorithm.py`, over the same six scenarios.
+
+## Making the videos and plots yourself
+
+Everything in `results/` is generated, so you can delete the folder and build it
+all back.
+
+The three demo videos come from `make_demo.py`:
+
+```
+cd campus-routing
+python3 make_demo.py
+```
+
+That writes `demo_closure.mp4`, `demo_crowd.mp4` and `demo_stops.mp4` into
+`results/` and prints the frame count for each one.
+
+The mp4 part needs ffmpeg. Check with `ffmpeg -version`, and if you don't have
+it:
+
+```
+brew install ffmpeg       # mac
+sudo apt install ffmpeg   # linux
+```
+
+Without ffmpeg it falls back to a gif. The gifs are bigger and look worse, so
+install ffmpeg if you can.
+
+Three settings at the top of `make_demo.py` change how the videos look:
+
+- `FPS` is playback speed, 3 is slow enough to read the side panel
+- `HOLD` is how many frames it freezes on the moment something happens
+- `TWEEN` is the in between frames while walking one edge, higher is smoother
+  but makes a longer video
+
+The bar charts come from `compare_plots.py`, but run `experiments.py` first
+because it reads `results/summary.csv`.
+
+`campus_graph.png` is the plain map of the whole graph. There's no script for
+it, it's a one liner:
+
+```
+python3 -c "import campus_nav; campus_nav.plot_graph(save_to='results/campus_graph.png')"
+```
+
+`plot_graph` also takes a `path` to draw a route on top and a `title`.
 
 ## How the graph data works
 
@@ -92,8 +133,7 @@ kind:
 
 Every factor has to stay at or above 1.0. If a path were ever faster than the
 straight line between its endpoints, the A* heuristic would start
-overestimating and A* would quietly return routes that are not actually the
-fastest. It would not crash, it would just be wrong, which is worse.
+overestimating and A* could return routes that are not actually the fastest.
 `check_graph.py` tests for this.
 
 One known limitation: real campus paths curve around buildings but our costs
@@ -125,6 +165,41 @@ it expanded and how long the replan took.
 - three changes in one trip
 - a crowd spike that makes a path slow but not blocked
 
-The point of the comparison: when the map changes, the naive planner redoes the
-whole search, D* Lite should only repair what changed. Nodes expanded is the
-number that shows the difference.
+When the map changes the naive planner redoes the whole search, while D* Lite
+only repairs what changed. Nodes expanded is the number that shows the
+difference.
+
+## Results
+
+Total nodes expanded across the whole trip, from `results/summary.csv`:
+
+| scenario | naive A* | D* Lite |
+| --- | --- | --- |
+| control_no_change | 42 | 44 |
+| block_near_start | 82 | 53 |
+| block_mid_route | 74 | 48 |
+| block_near_goal | 47 | 47 |
+| multiple_changes | 127 | 64 |
+| crowd_spike | 38 | 39 |
+
+D* Lite wins when there is something to repair, and the more changes there are
+the bigger the gap, since the naive planner pays for a full search every time
+and D* Lite doesn't. `multiple_changes` has three events in one trip and is
+where they separate most, 127 against 64.
+
+The control has nothing to repair, so it comes out even, D* Lite is two nodes
+worse because the first search has to run either way. `crowd_spike` is
+close for the same reason, a slower edge that doesn't block anything barely
+changes the route. `block_near_goal` ties because the agent is nearly there and
+neither planner has much left to search.
+
+Both planners produce the same `travel_minutes` in every scenario, so D* Lite
+is not saving work by returning worse routes.
+
+The milliseconds in `summary.csv` do not favor D* Lite, it is slower in wall
+clock in all six. On a 60 node graph a full A* is already under a millisecond,
+so what gets measured is mostly python overhead per node, and D* Lite does more
+work per node. Nodes expanded is the number that reflects the algorithms.
+
+A 60 node graph is also small enough that the savings stay small in absolute
+terms. The gap should widen on a bigger graph, but we have not tested that.

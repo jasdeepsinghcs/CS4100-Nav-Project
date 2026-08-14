@@ -1,5 +1,5 @@
 # Makes the comparison plots for the report. Run experiments.py first.
-# Plots whichever planners are in the csv, so it works before D* Lite is done.
+# Plots whichever planners are in the csv.
 
 import csv
 
@@ -39,6 +39,3 @@ for field, label, fname in plots:
     fig.tight_layout()
     fig.savefig("results/" + fname, dpi=150)
     print("wrote results/" + fname)
-
-if len(planners) == 1:
-    print("note: only the naive baseline in the csv so far, rerun this after D* Lite is in")

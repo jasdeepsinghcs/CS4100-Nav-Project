@@ -2,7 +2,7 @@
 what each planner had to do to recover.
 
 Naive baseline reruns the whole A* search from wherever the agent is standing.
-D* Lite is supposed to repair instead.
+D* Lite repairs instead.
 """
 
 import csv
@@ -11,12 +11,8 @@ import time
 
 import campus_nav as cn
 
-# kriti's D* Lite lives in algorithm.py, fall back to the stub in
-# campus_nav if that file isn't there
-try:
-    from algorithm import DStarLite
-except ImportError:
-    from campus_nav import DStarLite
+# kriti's D* Lite lives in algorithm.py
+from algorithm import DStarLite
 
 
 # ============ event injection ============
@@ -123,17 +119,6 @@ class DStarPlanner:
         self.inner.notify_edge_change(a, b, old_cost)
 
 
-def dstar_ready():
-    """True once DStarLite actually returns a path instead of the stub None."""
-    cn.reset_edges()
-    try:
-        result = DStarLite("snell_library", "curry_student_center").plan()
-        path, _ = result
-        return bool(path)
-    except Exception:
-        return False
-
-
 # ============ simulation ============
 
 def simulate(scenario, planner_class, log_rows):
@@ -154,8 +139,7 @@ def simulate(scenario, planner_class, log_rows):
         path, expanded = planner.plan()
         ms = (time.perf_counter() - t0) * 1000
 
-        # a planner that returns a wrong path instead of crashing would quietly
-        # ruin every number in the results, so shout about it here
+        # warn if the path doesn't start where the agent is or end at the goal
         if path and (path[0] != pos or path[-1] != goal):
             print(f"  WARNING {planner.name} bad path in {scenario['name']}: "
                   f"starts at {path[0]} (expected {pos}), "
@@ -218,12 +202,7 @@ def simulate(scenario, planner_class, log_rows):
 # ============ runner ============
 
 def main():
-    planners = [NaivePlanner]
-    if dstar_ready():
-        planners.append(DStarPlanner)
-        print("D* Lite found, running both planners\n")
-    else:
-        print("D* Lite not implemented yet, running naive baseline only\n")
+    planners = [NaivePlanner, DStarPlanner]
 
     log_rows = []
     summaries = []
